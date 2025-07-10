@@ -1,4 +1,3 @@
-
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -143,6 +142,7 @@ export default function SetupPage() {
                           <SelectItem value="student">Student</SelectItem>
                           <SelectItem value="professional">
                             Professional
+                          </s
                           </SelectItem>
                         </SelectContent>
                       </Select>
