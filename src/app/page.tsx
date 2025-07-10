@@ -142,8 +142,7 @@ export default function SetupPage() {
                           <SelectItem value="student">Student</SelectItem>
                           <SelectItem value="professional">
                             Professional
-                          </s
-                          </SelectItem>
+                          </se lectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
