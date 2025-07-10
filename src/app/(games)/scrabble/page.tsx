@@ -1,3 +1,4 @@
+
 'use client';
 
 import { validateScrabbleWord } from '@/ai/flows/validate-scrabble-word';
@@ -24,9 +25,46 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 const VOWELS = 'AEIOU';
 const CONSONANTS = 'BCDFGHJKLMNPQRSTVWXYZ';
+
+const boardLayout = [
+  ['tw', '', '', 'dl', '', '', '', 'tw', '', '', '', 'dl', '', '', 'tw'],
+  ['', 'dw', '', '', '', 'tl', '', '', '', 'tl', '', '', '', 'dw', ''],
+  ['', '', 'dw', '', '', '', 'dl', '', 'dl', '', '', '', 'dw', '', ''],
+  ['dl', '', '', 'dw', '', '', '', 'dl', '', '', '', 'dw', '', '', 'dl'],
+  ['', '', '', '', 'dw', '', '', '', '', '', 'dw', '', '', '', ''],
+  ['', 'tl', '', '', '', 'tl', '', '', '', 'tl', '', '', '', 'tl', ''],
+  ['', '', 'dl', '', '', '', 'dl', '', 'dl', '', '', '', 'dl', '', ''],
+  ['tw', '', '', 'dl', '', '', '', 'star', '', '', '', 'dl', '', '', 'tw'],
+  ['', '', 'dl', '', '', '', 'dl', '', 'dl', '', '', '', 'dl', '', ''],
+  ['', 'tl', '', '', '', 'tl', '', '', '', 'tl', '', '', '', 'tl', ''],
+  ['', '', '', '', 'dw', '', '', '', '', '', 'dw', '', '', '', ''],
+  ['dl', '', '', 'dw', '', '', '', 'dl', '', '', '', 'dw', '', '', 'dl'],
+  ['', '', 'dw', '', '', '', 'dl', '', 'dl', '', '', '', 'dw', '', ''],
+  ['', 'dw', '', '', '', 'tl', '', '', '', 'tl', '', '', '', 'dw', ''],
+  ['tw', '', '', 'dl', '', '', '', 'tw', '', '', '', 'dl', '', '', 'tw'],
+];
+
+const tileClasses: { [key: string]: string } = {
+  tw: 'bg-red-500 text-white',
+  dw: 'bg-pink-300 text-pink-800',
+  tl: 'bg-blue-500 text-white',
+  dl: 'bg-blue-200 text-blue-800',
+  star: 'bg-pink-300 text-pink-800',
+  default: 'bg-green-100 border-green-200',
+};
+
+const tileLabels: { [key: string]: string } = {
+  tw: 'TRIPLE WORD',
+  dw: 'DOUBLE WORD',
+  tl: 'TRIPLE LETTER',
+  dl: 'DOUBLE LETTER',
+  star: '★',
+};
+
 
 function generateTiles(count: number): string[] {
   const newTiles: string[] = [];
@@ -132,24 +170,20 @@ export default function ScrabblePage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div
-                className="relative aspect-square w-full rounded-lg bg-blue-100 p-4"
-                style={{
-                  backgroundImage:
-                    'linear-gradient(rgba(255,255,255,0.8), rgba(255,255,255,0.8)), url(https://placehold.co/600x600.png)',
-                  backgroundSize: 'cover',
-                }}
-                data-ai-hint="scrabble board game"
-              >
-                <div className="flex h-full w-full items-center justify-center">
-                  <p className="rounded-md bg-background/80 p-4 text-center text-lg font-semibold text-foreground">
-                    Scrabble Board Placeholder
-                    <br />
-                    <span className="text-sm font-normal text-muted-foreground">
-                      Form words with your tiles below.
-                    </span>
-                  </p>
-                </div>
+              <div className="mx-auto aspect-square w-full max-w-xl rounded-lg bg-green-800 p-2 shadow-inner">
+                 <div className="grid grid-cols-15 gap-0.5">
+                  {boardLayout.flat().map((type, index) => (
+                    <div
+                      key={index}
+                      className={cn(
+                        'aspect-square flex items-center justify-center rounded-sm text-[6px] font-bold text-center leading-none',
+                        tileClasses[type || 'default']
+                      )}
+                    >
+                      {tileLabels[type]}
+                    </div>
+                  ))}
+                 </div>
               </div>
             </CardContent>
           </Card>
@@ -176,7 +210,7 @@ export default function ScrabblePage() {
                 className="w-full"
                 onClick={handleNewGame}
               >
-                <RefreshCw className="mr-2" />
+                <RefreshCw className="mr-2 h-4 w-4" />
                 New Tiles / Reset
               </Button>
             </CardFooter>
@@ -216,9 +250,9 @@ export default function ScrabblePage() {
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? (
-                    <Loader2 className="mr-2 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
-                    <CheckCircle className="mr-2" />
+                    <CheckCircle className="mr-2 h-4 w-4" />
                   )}
                   Check Word & Grammar
                 </Button>
@@ -243,6 +277,7 @@ export default function ScrabblePage() {
                 </p>
               </CardContent>
             </Card>
+          </Card>
           )}
         </div>
       </div>
