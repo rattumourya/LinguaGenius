@@ -9,7 +9,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
+import { z } from 'zod';
 
 export const ValidateScrabbleWordInputSchema = z.object({
   word: z.string().describe('The word to validate.'),
