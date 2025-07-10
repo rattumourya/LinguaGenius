@@ -10,7 +10,7 @@ import {
   Loader2,
   RefreshCw,
 } from 'lucide-react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import {
@@ -87,11 +87,16 @@ export default function ScrabblePage() {
   const { toast } = useToast();
   const [word, setWord] = useState('');
   const [sentence, setSentence] = useState('');
-  const [tiles, setTiles] = useState<string[]>(() => generateTiles(7));
+  const [tiles, setTiles] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [lastResult, setLastResult] = useState<ValidateScrabbleWordOutput | null>(
     null
   );
+
+  useEffect(() => {
+    // Generate tiles only on the client-side after initial render
+    setTiles(generateTiles(7));
+  }, []);
 
   const handleNewGame = useCallback(() => {
     setWord('');
@@ -194,14 +199,16 @@ export default function ScrabblePage() {
               <CardTitle>Your Tiles</CardTitle>
             </CardHeader>
             <CardContent className="flex justify-center gap-2">
-              {tiles.map((tile, index) => (
+              {tiles.length > 0 ? tiles.map((tile, index) => (
                 <div
                   key={index}
                   className="flex h-12 w-12 items-center justify-center rounded-md bg-yellow-200 text-2xl font-bold text-yellow-900 shadow-md"
                 >
                   {tile}
                 </div>
-              ))}
+              )) : (
+                <div className="h-12 text-muted-foreground flex items-center">Generating tiles...</div>
+              )}
             </CardContent>
             <CardFooter>
               <Button
