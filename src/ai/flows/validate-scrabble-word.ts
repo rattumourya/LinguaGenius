@@ -4,30 +4,21 @@
  * @fileOverview Validates a Scrabble word and its usage in a sentence.
  *
  * - validateScrabbleWord - A function that validates a word against available tiles and checks sentence grammar.
- * - ValidateScrabbleWordInput - The input type for the validateScrabbleWord function.
- * - ValidateScrabbleWordOutput - The return type for the validateScrabbleWord function.
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
+import type {
+  ValidateScrabbleWordInput,
+  ValidateScrabbleWordOutput,
+} from '@/ai/schemas/scrabble-schema';
+import {
+  ValidateScrabbleWordInputSchema,
+  ValidateScrabbleWordOutputSchema,
+} from '@/ai/schemas/scrabble-schema';
 
-export const ValidateScrabbleWordInputSchema = z.object({
-  word: z.string().describe('The word to validate.'),
-  tiles: z.array(z.string()).describe('The available letter tiles.'),
-  sentence: z.string().describe('The sentence using the word to check for grammar.'),
-});
-export type ValidateScrabbleWordInput = z.infer<typeof ValidateScrabbleWordInputSchema>;
-
-export const ValidateScrabbleWordOutputSchema = z.object({
-  isValidWord: z.boolean().describe('Whether the word is a valid English word.'),
-  canBeMadeFromTiles: z.boolean().describe('Whether the word can be formed from the given tiles.'),
-  isGrammaticallyCorrect: z.boolean().describe('Whether the sentence is grammatically correct.'),
-  feedback: z.string().describe('Feedback on the word and sentence.'),
-});
-export type ValidateScrabbleWordOutput = z.infer<typeof ValidateScrabbleWordOutputSchema>;
-
-
-export async function validateScrabbleWord(input: ValidateScrabbleWordInput): Promise<ValidateScrabbleWordOutput> {
+export async function validateScrabbleWord(
+  input: ValidateScrabbleWordInput
+): Promise<ValidateScrabbleWordOutput> {
   return validateScrabbleWordFlow(input);
 }
 
