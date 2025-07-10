@@ -65,7 +65,6 @@ const tileLabels: { [key: string]: string } = {
   star: '★',
 };
 
-
 function generateTiles(count: number): string[] {
   const newTiles: string[] = [];
   // Ensure at least 2 vowels
@@ -277,7 +276,6 @@ export default function ScrabblePage() {
                 </p>
               </CardContent>
             </Card>
-          </Card>
           )}
         </div>
       </div>
