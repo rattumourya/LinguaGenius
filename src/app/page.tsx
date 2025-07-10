@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -31,6 +32,7 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { BrainCircuit } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const formSchema = z
   .object({
@@ -42,15 +44,10 @@ const formSchema = z
   })
   .refine(
     (data) => {
-      // User must provide either a document or a context.
       return !!data.document?.length || !!data.context;
     },
     {
       message: 'Please either upload a document or choose a preset context.',
-      // To show the error on a specific field, we can specify the path.
-      // If we want a global form error, we can omit this.
-      // For this case, it makes sense to associate it with the 'context' field,
-      // as it's the second option if a document isn't provided.
       path: ['context'],
     }
   );
@@ -71,7 +68,6 @@ export default function SetupPage() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    // In a real app, you would process the file and set the context
     let fileContent = '';
     if (values.document && values.document.length > 0) {
       try {
@@ -85,13 +81,14 @@ export default function SetupPage() {
         return;
       }
     }
-    
-    // For demonstration, we'll store settings in localStorage to be accessed on other pages.
-    // A context provider would be a more robust solution for a full app.
-    localStorage.setItem('linguaGeniusSettings', JSON.stringify({
-      ...values,
-      documentText: fileContent,
-    }));
+
+    localStorage.setItem(
+      'linguaGeniusSettings',
+      JSON.stringify({
+        ...values,
+        documentText: fileContent,
+      })
+    );
 
     toast({
       title: 'Profile Saved!',
@@ -107,12 +104,12 @@ export default function SetupPage() {
         <div className="mb-4 rounded-full bg-primary/10 p-3">
           <BrainCircuit className="h-10 w-10 text-primary" />
         </div>
-        <h1 className="text-4xl font-bold tracking-tight text-primary sm:text-5xl font-headline">
+        <h1 className="font-headline text-4xl font-bold tracking-tight text-primary sm:text-5xl">
           LinguaGenius
         </h1>
         <p className="mt-4 max-w-2xl text-lg text-foreground/80">
-          Welcome! Let's tailor your AI-powered English learning journey.
-          Start by setting up your profile.
+          Welcome! Let's tailor your AI-powered English learning journey. Start
+          by setting up your profile.
         </p>
       </div>
 
@@ -202,16 +199,20 @@ export default function SetupPage() {
                 name="document"
                 render={({ field: { onChange, value, ...rest } }) => (
                   <FormItem>
-                    <FormLabel>Upload a Document (Optional)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="file"
-                        accept=".txt"
-                        onChange={(e) => onChange(e.target.files)}
-                        {...rest}
-                        className="file:text-primary-foreground file:mr-4 file:bg-primary file:px-4 file:py-2 file:border-0 file:rounded-md hover:file:bg-primary/90"
-                      />
-                    </FormControl>
+                    <div className="flex items-center gap-4">
+                      <FormLabel className="shrink-0">
+                        Upload a Document (Optional)
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="file"
+                          accept=".txt"
+                          onChange={(e) => onChange(e.target.files)}
+                          {...rest}
+                          className="file:mr-4 file:rounded-md file:border-0 file:bg-primary file:px-4 file:py-2 file:text-primary-foreground hover:file:bg-primary/90"
+                        />
+                      </FormControl>
+                    </div>
                     <FormDescription>
                       Upload a .txt file (book, notes) to create games from.
                     </FormDescription>
@@ -237,11 +238,14 @@ export default function SetupPage() {
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a context" />
-                        </SelectTrigger>
+                        </Trigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="general">General English</SelectItem>
+                        <SelectItem value="general">
+                          General English
+                        </SelectItem>
                         <SelectItem value="business">Business</SelectItem>
+
                         <SelectItem value="academic">Academic</SelectItem>
                         <SelectItem value="medical">Medical</SelectItem>
                       </SelectContent>
