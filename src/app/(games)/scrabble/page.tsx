@@ -1,42 +1,74 @@
 'use client';
 
 import { validateScrabbleWord } from '@/ai/flows/validate-scrabble-word';
-import { AppWindow, CheckCircle, Gamepad2, Loader2, Send } from 'lucide-react';
-import React, { useState } from 'react';
+import type { ValidateScrabbleWordOutput } from '@/ai/schemas/scrabble-schema';
+import {
+  AppWindow,
+  CheckCircle,
+  Gamepad2,
+  Loader2,
+  RefreshCw,
+} from 'lucide-react';
+import React, { useCallback, useState } from 'react';
 import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 
+const VOWELS = 'AEIOU';
+const CONSONANTS = 'BCDFGHJKLMNPQRSTVWXYZ';
+
+function generateTiles(count: number): string[] {
+  const newTiles: string[] = [];
+  // Ensure at least 2 vowels
+  for (let i = 0; i < 2; i++) {
+    newTiles.push(VOWELS[Math.floor(Math.random() * VOWELS.length)]);
+  }
+  // Ensure at least 2 consonants
+  for (let i = 0; i < 2; i++) {
+    newTiles.push(CONSONANTS[Math.floor(Math.random() * CONSONANTS.length)]);
+  }
+  // Fill the rest randomly
+  const allLetters = VOWELS + CONSONANTS;
+  for (let i = 4; i < count; i++) {
+    newTiles.push(allLetters[Math.floor(Math.random() * allLetters.length)]);
+  }
+  return newTiles.sort(() => Math.random() - 0.5);
+}
+
 export default function ScrabblePage() {
   const { toast } = useToast();
   const [word, setWord] = useState('');
   const [sentence, setSentence] = useState('');
-  const [tiles, setTiles] = useState(['A', 'I', 'L', 'N', 'G', 'U', 'S']);
+  const [tiles, setTiles] = useState<string[]>(() => generateTiles(7));
   const [loading, setLoading] = useState(false);
-  const [wordSubmitted, setWordSubmitted] = useState(false);
+  const [lastResult, setLastResult] = useState<ValidateScrabbleWordOutput | null>(
+    null
+  );
 
-  const handleWordSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!word) {
-      toast({
-        variant: 'destructive',
-        title: 'No word entered',
-        description: 'Please form a word with your tiles.',
-      });
-      return;
-    }
-    setWordSubmitted(true);
+  const handleNewGame = useCallback(() => {
+    setWord('');
+    setSentence('');
+    setTiles(generateTiles(7));
+    setLastResult(null);
     toast({
-      title: `Word Entered: "${word}"`,
-      description: `Now use it in a sentence to test its grammar.`,
+      title: 'New Game Started!',
+      description: 'You have a fresh set of tiles.',
     });
-  };
+  }, [toast]);
 
-  const handleCheck = async () => {
+  const handleCheck = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!word || !sentence) {
       toast({
         variant: 'destructive',
@@ -46,28 +78,28 @@ export default function ScrabblePage() {
       return;
     }
     setLoading(true);
+    setLastResult(null);
     try {
       const result = await validateScrabbleWord({
         word,
         tiles,
         sentence,
       });
+      setLastResult(result);
 
-      if (!result.isValidWord || !result.canBeMadeFromTiles) {
-         toast({
+      if (
+        !result.isValidWord ||
+        !result.canBeMadeFromTiles ||
+        !result.isGrammaticallyCorrect
+      ) {
+        toast({
           variant: 'destructive',
-          title: 'Invalid Word',
-          description: result.feedback,
-        });
-      } else if (!result.isGrammaticallyCorrect) {
-         toast({
-          variant: 'destructive',
-          title: 'Grammar Issue',
+          title: 'Validation Failed',
           description: result.feedback,
         });
       } else {
         toast({
-          title: 'Success!',
+          title: `Success! You scored ${result.score} points!`,
           description: result.feedback,
           action: <CheckCircle className="text-green-500" />,
         });
@@ -87,7 +119,7 @@ export default function ScrabblePage() {
   return (
     <>
       <PageHeader
-        title="Scrabble / Grammar Detective"
+        title="Scrabble"
         description="Build words, score points, and ensure your grammar is flawless."
         icon={AppWindow}
       />
@@ -114,7 +146,7 @@ export default function ScrabblePage() {
                     Scrabble Board Placeholder
                     <br />
                     <span className="text-sm font-normal text-muted-foreground">
-                      Drag and drop tiles to form words here.
+                      Form words with your tiles below.
                     </span>
                   </p>
                 </div>
@@ -138,59 +170,80 @@ export default function ScrabblePage() {
                 </div>
               ))}
             </CardContent>
+            <CardFooter>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleNewGame}
+              >
+                <RefreshCw className="mr-2" />
+                New Tiles / Reset
+              </Button>
+            </CardFooter>
           </Card>
 
           <Card className="shadow-lg">
             <CardHeader>
               <CardTitle>Play Your Word</CardTitle>
+              <CardDescription>
+                Form a word with your tiles, then use it in a sentence.
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleWordSubmit} className="space-y-4">
-                <Label htmlFor="word-input">Form a word</Label>
-                <div className="flex gap-2">
+              <form onSubmit={handleCheck} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="word-input">Word</Label>
                   <Input
                     id="word-input"
                     placeholder="e.g., LINGUA"
                     value={word}
                     onChange={(e) => setWord(e.target.value.toUpperCase())}
-                    disabled={wordSubmitted}
+                    disabled={loading}
+                    autoComplete="off"
                   />
-                  <Button type="submit" size="icon" disabled={wordSubmitted}>
-                    <Send className="h-4 w-4" />
-                  </Button>
                 </div>
-              </form>
-            </CardContent>
-          </Card>
-          
-          {wordSubmitted && (
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle>Grammar Check</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Label htmlFor="sentence-input">
-                  Use "{word || 'your word'}" in a sentence
-                </Label>
-                <Textarea
-                  id="sentence-input"
-                  placeholder="Write your sentence here..."
-                  value={sentence}
-                  onChange={(e) => setSentence(e.target.value)}
-                  disabled={loading}
-                />
-                <Button onClick={handleCheck} className="w-full" disabled={loading}>
+                <div className="space-y-2">
+                  <Label htmlFor="sentence-input">
+                    Use "{word || 'your word'}" in a sentence
+                  </Label>
+                  <Textarea
+                    id="sentence-input"
+                    placeholder="Write your sentence here..."
+                    value={sentence}
+                    onChange={(e) => setSentence(e.target.value)}
+                    disabled={loading}
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 animate-spin" />
                   ) : (
-                    <CheckCircle className="mr-2 h-4 w-4" />
+                    <CheckCircle className="mr-2" />
                   )}
                   Check Word & Grammar
                 </Button>
+              </form>
+            </CardContent>
+          </Card>
+
+          {lastResult && (
+            <Card className="shadow-lg">
+              <CardHeader>
+                <CardTitle>Last Play Result</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                <p>
+                  <strong>Word:</strong> {word}
+                </p>
+                <p>
+                  <strong>Score:</strong> {lastResult.score}
+                </p>
+                <p>
+                  <strong>Feedback:</strong> {lastResult.feedback}
+                </p>
               </CardContent>
             </Card>
           )}
-
         </div>
       </div>
     </>

@@ -39,6 +39,8 @@ Second, determine if the played word is a valid English word.
 
 Third, check if the provided sentence is grammatically correct. The sentence must use the played word.
 
+Fourth, calculate the Scrabble score for the word. Use standard Scrabble tile values (e.g., A=1, B=3, C=3, D=2, E=1, etc.).
+
 Provide your validation results in the specified JSON format. The feedback should be a concise, helpful message for the user. For example, if the word is invalid, say "Sorry, '{{word}}' is not a valid English word." If the tiles are wrong, say "You don't have the right tiles to make '{{word}}'." If the grammar is incorrect, provide a brief explanation of the error. If everything is correct, say "Excellent! '{{word}}' is a valid word and your sentence is grammatically correct."
 `,
 });

@@ -21,5 +21,6 @@ export const ValidateScrabbleWordOutputSchema = z.object({
   canBeMadeFromTiles: z.boolean().describe('Whether the word can be formed from the given tiles.'),
   isGrammaticallyCorrect: z.boolean().describe('Whether the sentence is grammatically correct.'),
   feedback: z.string().describe('Feedback on the word and sentence.'),
+  score: z.number().describe('The Scrabble score for the word.'),
 });
 export type ValidateScrabbleWordOutput = z.infer<typeof ValidateScrabbleWordOutputSchema>;
