@@ -44,7 +44,7 @@ const formSchema = z
   })
   .refine(
     (data) => {
-      return !!data.document?.length || !!data.context;
+      return !!data.context || (!!data.document && data.document.length > 0);
     },
     {
       message: 'Please either upload a document or choose a preset context.',
@@ -245,7 +245,6 @@ export default function SetupPage() {
                           General English
                         </SelectItem>
                         <SelectItem value="business">Business</SelectItem>
-
                         <SelectItem value="academic">Academic</SelectItem>
                         <SelectItem value="medical">Medical</SelectItem>
                       </SelectContent>
