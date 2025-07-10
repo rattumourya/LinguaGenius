@@ -76,11 +76,9 @@ export default function DashboardPage() {
               </div>
             </CardHeader>
             <CardFooter>
-              <Link href={game.href} className="w-full" passHref>
-                <Button className="w-full" variant="outline">
-                  Play Now
-                </Button>
-              </Link>
+              <Button className="w-full" variant="outline" asChild>
+                <Link href={game.href}>Play Now</Link>
+              </Button>
             </CardFooter>
           </Card>
         ))}
