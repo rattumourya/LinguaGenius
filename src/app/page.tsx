@@ -237,7 +237,7 @@ export default function SetupPage() {
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a context" />
-                        </Trigger>
+                        </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="general">
