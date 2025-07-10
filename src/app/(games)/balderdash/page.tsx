@@ -25,11 +25,17 @@ export default function BalderdashPage() {
   const [selection, setSelection] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const shuffledDefinitions = useMemo(() => {
-    // This will only re-run when `definitions` change
+    if (!isMounted) return [];
+    // This will only re-run when `definitions` change on the client
     return [...definitions].sort(() => Math.random() - 0.5);
-  }, [definitions]);
+  }, [definitions, isMounted]);
 
   const fetchDefinitions = async () => {
     if (!word) {
@@ -87,7 +93,7 @@ export default function BalderdashPage() {
       return;
     }
     setSubmitted(true);
-    const chosenDef = shuffledDefinitions.find((d) => d.text === selection);
+    const chosenDef = definitions.find((d) => d.text === selection);
     if (chosenDef?.isReal) {
       toast({
         title: 'Correct!',
@@ -159,7 +165,7 @@ export default function BalderdashPage() {
             <Loader2 className="h-12 w-12 animate-spin text-primary" />
           </div>
         ) : (
-          definitions.length > 0 && (
+          definitions.length > 0 && isMounted && (
             <Card className="shadow-lg">
               <CardHeader>
                 <CardTitle>Which is the correct definition for "{word}"?</CardTitle>

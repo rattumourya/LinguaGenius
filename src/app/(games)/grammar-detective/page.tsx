@@ -128,10 +128,8 @@ export default function GrammarDetectivePage() {
               <div className="space-y-4">
                 <Textarea
                   readOnly
-                  value={isRevealed ? originalText : textWithErrors}
-                  className={`min-h-[150px] text-lg leading-relaxed ${
-                    isRevealed ? 'bg-green-100' : ''
-                  }`}
+                  value={textWithErrors}
+                  className={`min-h-[150px] text-lg leading-relaxed`}
                 />
                 <Button
                   onClick={() => setIsRevealed(!isRevealed)}
@@ -143,11 +141,11 @@ export default function GrammarDetectivePage() {
                 {isRevealed && (
                   <Card className="bg-muted p-4">
                     <CardHeader className="p-0 pb-2">
-                      <CardTitle className="text-lg">Original Text</CardTitle>
+                      <CardTitle className="text-lg">Correct Text</CardTitle>
                     </CardHeader>
                     <CardContent className="p-0">
                       <p className="text-lg leading-relaxed text-muted-foreground">
-                        {textWithErrors}
+                        {originalText}
                       </p>
                     </CardContent>
                   </Card>
