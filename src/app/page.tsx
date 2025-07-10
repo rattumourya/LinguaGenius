@@ -42,12 +42,16 @@ const formSchema = z
   })
   .refine(
     (data) => {
-      // For this example, we'll just log the settings to the console.
-      // In a real app, you would pass this to the context.
-      return true;
+      // User must provide either a document or a context.
+      return !!data.document?.length || !!data.context;
     },
     {
-      message: 'Either a document or a context must be provided.',
+      message: 'Please either upload a document or choose a preset context.',
+      // To show the error on a specific field, we can specify the path.
+      // If we want a global form error, we can omit this.
+      // For this case, it makes sense to associate it with the 'context' field,
+      // as it's the second option if a document isn't provided.
+      path: ['context'],
     }
   );
 

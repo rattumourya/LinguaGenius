@@ -2,7 +2,7 @@
 
 import { generateGrammaticalErrors } from '@/ai/flows/generate-grammatical-errors';
 import { Loader2, SearchCheck, Sparkles } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,6 +20,17 @@ export default function GrammarDetectivePage() {
   const [errorCount, setErrorCount] = useState(3);
   const [loading, setLoading] = useState(false);
   const [isRevealed, setIsRevealed] = useState(false);
+
+  useEffect(() => {
+    // Check for settings in localStorage to prevent crashes on direct navigation
+    const settings = localStorage.getItem('linguaGeniusSettings');
+    if (settings) {
+      const parsedSettings = JSON.parse(settings);
+      if (parsedSettings.documentText) {
+        setOriginalText(parsedSettings.documentText);
+      }
+    }
+  }, []);
 
   const handleGenerateErrors = async () => {
     if (!originalText) {

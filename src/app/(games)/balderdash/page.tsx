@@ -29,6 +29,14 @@ export default function BalderdashPage() {
 
   useEffect(() => {
     setIsMounted(true);
+    // Check for settings in localStorage to prevent crashes on direct navigation
+    const settings = localStorage.getItem('linguaGeniusSettings');
+    if (settings) {
+      const parsedSettings = JSON.parse(settings);
+      if (parsedSettings.context) {
+        setContext(parsedSettings.context);
+      }
+    }
   }, []);
 
   const shuffledDefinitions = useMemo(() => {
@@ -109,11 +117,10 @@ export default function BalderdashPage() {
   };
 
   const getCardClass = (def: Definition) => {
-    if (!submitted)
-      return 'bg-card hover:bg-muted cursor-pointer';
-    if (def.isReal) return 'bg-green-200 border-green-400';
+    if (!submitted) return 'bg-card hover:bg-muted cursor-pointer';
+    if (def.isReal) return 'bg-accent border-primary';
     if (def.text === selection && !def.isReal)
-      return 'bg-red-200 border-red-400';
+      return 'bg-destructive/20 border-destructive';
     return 'bg-card opacity-60';
   };
 

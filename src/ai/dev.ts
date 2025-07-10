@@ -6,3 +6,4 @@ import '@/ai/flows/generate-balderdash-definitions.ts';
 import '@/ai/flows/adapt-articulate-clues.ts';
 import '@/ai/flows/summarize-document.ts';
 import '@/ai/flows/generate-grammatical-errors.ts';
+import '@/ai/flows/validate-scrabble-word.ts';

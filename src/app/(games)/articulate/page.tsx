@@ -2,7 +2,7 @@
 
 import { adaptArticulateClues } from '@/ai/flows/adapt-articulate-clues';
 import { Loader2, MicVocal, Sparkles } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import {
@@ -25,6 +25,19 @@ export default function ArticulatePage() {
   );
   const [clues, setClues] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // Check for settings in localStorage to prevent crashes on direct navigation
+    const settings = localStorage.getItem('linguaGeniusSettings');
+    if (settings) {
+      const parsedSettings = JSON.parse(settings);
+      if (parsedSettings.documentText) {
+        setContextText(parsedSettings.documentText);
+      } else if (parsedSettings.context) {
+        // You could fetch context-specific text here if needed
+      }
+    }
+  }, []);
 
   const handleGenerateClues = async () => {
     if (!word || !contextText) {

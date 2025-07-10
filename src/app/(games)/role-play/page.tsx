@@ -2,7 +2,7 @@
 
 import { generateRolePlayScenarios } from '@/ai/flows/generate-role-play-scenarios';
 import { Loader2, Sparkles, UsersRound } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PageHeader } from '@/components/PageHeader';
 import {
   Accordion,
@@ -36,6 +36,17 @@ export default function RolePlayPage() {
   const [level, setLevel] = useState('intermediate');
   const [scenarios, setScenarios] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // Check for settings in localStorage to prevent crashes on direct navigation
+    const settings = localStorage.getItem('linguaGeniusSettings');
+    if (settings) {
+      const parsedSettings = JSON.parse(settings);
+      if(parsedSettings.context) setContext(parsedSettings.context);
+      if(parsedSettings.goal) setGoal(parsedSettings.goal);
+      if(parsedSettings.level) setLevel(parsedSettings.level);
+    }
+  }, []);
 
   const handleGenerateScenarios = async () => {
     setLoading(true);

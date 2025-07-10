@@ -1,6 +1,7 @@
 'use client';
 
-import { AppWindow, CheckCircle, Gamepad2, Send } from 'lucide-react';
+import { validateScrabbleWord } from '@/ai/flows/validate-scrabble-word';
+import { AppWindow, CheckCircle, Gamepad2, Loader2, Send } from 'lucide-react';
 import React, { useState } from 'react';
 import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
@@ -15,8 +16,10 @@ export default function ScrabblePage() {
   const [word, setWord] = useState('');
   const [sentence, setSentence] = useState('');
   const [tiles, setTiles] = useState(['A', 'I', 'L', 'N', 'G', 'U', 'S']);
+  const [loading, setLoading] = useState(false);
+  const [wordSubmitted, setWordSubmitted] = useState(false);
 
-  const handleSubmitWord = (e: React.FormEvent) => {
+  const handleWordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!word) {
       toast({
@@ -26,27 +29,59 @@ export default function ScrabblePage() {
       });
       return;
     }
+    setWordSubmitted(true);
     toast({
-      title: `Word Submitted: "${word}"`,
-      description: `Great job! Now use it in a sentence to test its grammar.`,
+      title: `Word Entered: "${word}"`,
+      description: `Now use it in a sentence to test its grammar.`,
     });
   };
 
-  const handleCheckGrammar = () => {
-    if (!sentence) {
+  const handleCheck = async () => {
+    if (!word || !sentence) {
       toast({
         variant: 'destructive',
-        title: 'No sentence entered',
-        description: 'Please write a sentence using your word.',
+        title: 'Missing information',
+        description: 'Please provide both a word and a sentence.',
       });
       return;
     }
-    toast({
-      title: 'Grammar Checked!',
-      description:
-        'Looks good! Your sentence is grammatically correct. (AI check placeholder)',
-      action: <CheckCircle className="text-green-500" />,
-    });
+    setLoading(true);
+    try {
+      const result = await validateScrabbleWord({
+        word,
+        tiles,
+        sentence,
+      });
+
+      if (!result.isValidWord || !result.canBeMadeFromTiles) {
+         toast({
+          variant: 'destructive',
+          title: 'Invalid Word',
+          description: result.feedback,
+        });
+      } else if (!result.isGrammaticallyCorrect) {
+         toast({
+          variant: 'destructive',
+          title: 'Grammar Issue',
+          description: result.feedback,
+        });
+      } else {
+        toast({
+          title: 'Success!',
+          description: result.feedback,
+          action: <CheckCircle className="text-green-500" />,
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Could not validate your word. Please try again.',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -110,7 +145,7 @@ export default function ScrabblePage() {
               <CardTitle>Play Your Word</CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmitWord} className="space-y-4">
+              <form onSubmit={handleWordSubmit} className="space-y-4">
                 <Label htmlFor="word-input">Form a word</Label>
                 <div className="flex gap-2">
                   <Input
@@ -118,34 +153,44 @@ export default function ScrabblePage() {
                     placeholder="e.g., LINGUA"
                     value={word}
                     onChange={(e) => setWord(e.target.value.toUpperCase())}
+                    disabled={wordSubmitted}
                   />
-                  <Button type="submit" size="icon">
+                  <Button type="submit" size="icon" disabled={wordSubmitted}>
                     <Send className="h-4 w-4" />
                   </Button>
                 </div>
               </form>
             </CardContent>
           </Card>
+          
+          {wordSubmitted && (
+            <Card className="shadow-lg">
+              <CardHeader>
+                <CardTitle>Grammar Check</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Label htmlFor="sentence-input">
+                  Use "{word || 'your word'}" in a sentence
+                </Label>
+                <Textarea
+                  id="sentence-input"
+                  placeholder="Write your sentence here..."
+                  value={sentence}
+                  onChange={(e) => setSentence(e.target.value)}
+                  disabled={loading}
+                />
+                <Button onClick={handleCheck} className="w-full" disabled={loading}>
+                  {loading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <CheckCircle className="mr-2 h-4 w-4" />
+                  )}
+                  Check Word & Grammar
+                </Button>
+              </CardContent>
+            </Card>
+          )}
 
-          <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle>Grammar Check</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Label htmlFor="sentence-input">
-                Use "{word || 'your word'}" in a sentence
-              </Label>
-              <Textarea
-                id="sentence-input"
-                placeholder="Write your sentence here..."
-                value={sentence}
-                onChange={(e) => setSentence(e.target.value)}
-              />
-              <Button onClick={handleCheckGrammar} className="w-full">
-                <CheckCircle className="mr-2 h-4 w-4" /> Check Grammar
-              </Button>
-            </CardContent>
-          </Card>
         </div>
       </div>
     </>
